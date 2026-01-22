@@ -1,0 +1,48 @@
+@pkg root;
+
+// Import specific public functions and custom data types
+@imp { lex_regex, Token } from "lexer";
+
+// Import all public functions and custom data types
+@imp * from "parser";
+
+public {
+  fn main(): i32 {
+    string rgx = "a*b+c?";
+    string[] tests = ["aaabc", "bb", "abc", "", "c", "aaaaaac"];
+
+    bool[] res = matches(rgx, tests);
+    for result in res {
+      println(result);
+    }
+
+    return 0;
+  }
+}
+
+private {
+  // regex and input are immutable refs by default 
+  fn match_regex(Regex* regex, string input): bool {
+    //
+  }
+
+  // expr and tests are immutable refs by default
+  fn matches(string expr, string[] tests): bool[] {
+    // tokens ownership passed through function implicitly
+    // '[*]' type postfix describes an array that has been manually allocated memory
+    Token[*] tokens = lex_regex(expr);
+
+    Regex* regex = build_regex(tokens);
+
+    // Allocate a specific array size
+    // Use compiler functions with a '@' prefix
+    bool[] res[@len(tests)];
+
+    for usize i = 0; i < @len(tests); i += 1 {
+      res[i] = match_regex(regex, tests[i]);
+    }
+
+    return res;
+    // tokens goes out of scope, memory is freed automatically
+  } 
+}

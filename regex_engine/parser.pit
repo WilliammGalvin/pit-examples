@@ -1,0 +1,17 @@
+@pkg root
+
+public {
+  type Regex = (
+    | Char char
+    | Concat Regex* Regex*
+    | Alt Regex* Regex*
+    | Star Regex*
+    | Plus Regex*
+    | Optional Regex*
+    | Group Regex*
+  );
+
+  fn build_regex(Token[] tokens): Regex* {
+    //
+  }
+}

@@ -1,0 +1,79 @@
+@pkg root
+
+// Public access scope
+public {
+  // Algebraic data type (ADT)
+  type Token = (
+    | Char char
+    | LParen
+    | RParen
+    | Pipe
+    | Star
+    | Plus
+    | Question
+    | End
+  );
+
+  // input is an immutable ref by default
+  fn lex_regex(string input): Token[*] {
+    usize pos = 0;
+    usize n = @len(input + 1);
+
+    // Allocate memory for a Token array with size of n with the 'alloc' keyword
+    // tokens is the owner of the data, once it goes out of scope memory is freed
+    Token[] tokens = alloc Token[n];
+
+    usize token_count = 0;
+    while pos < @len(input) {
+      // Unpack tuple and potential error with 'let' keyword
+      // Type is deduced from strong typing in function signatures
+      let (token, next_pos), err = lex_token(input, pos);
+
+      // Check if error occured
+      if err {
+        // Terminate program with an exit message
+        // Get the error message with 'msg'
+        // Error code -1
+        @halt(err.msg, -1);
+      }
+
+      tokens[token_count] = token;
+      pos = next_pos;
+
+      // No ++ or -- operators for clarity
+      token_count += 1;
+    }
+
+    // Enums and ADTs accessed with '.' operator
+    tokens[token_count] = Token.End;
+
+    // tokens ownership is passed implicitly
+    return tokens;
+  }
+}
+
+// Private access scope
+private {
+  // string is an immutable ref by default
+  // pos is a shallow copy, indicated by the '!' type postfix
+  // Return tuple or error, indicated by the '?' type postfix
+  fn lex_token(string input, usize! pos): (Token, usize)? {
+    // 'match' keyword must return a value for every case or error
+    return match input[pos] {
+      // Use ranges for expressive matching
+      // '..' operator is for inclusive range
+      // '..<' operator is for exclusive range
+      'a'..'z', 'A'..'Z', '0'..'9' => (Token.Char(input[pos]), pos + 1),
+      '(' => (Token.LParen, pos + 1),
+      ')' => (Token.RParen, pos + 1),
+      '|' => (Token.Pipe, pos + 1),
+      '*' => (Token.Star, pos + 1),
+      '+' => (Token.Plus, pos + 1),
+      '?' => (Token.Question, pos + 1),
+      '\\' => (Token.Char(input[pos + 1]), pos + 2),
+      
+      // Return an error using the `error` keyword with an optional error message
+      _ => error("unexpected char"),
+    }
+  }
+}
